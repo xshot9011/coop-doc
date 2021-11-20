@@ -187,7 +187,7 @@ Infrastructure ที่ได้รับการปรับปรุงใ�
       1. Workloads
       ```txt
       คือ application ที่ทำงานอยู่ใน Kubernetes cluster โดยจะแบ่งเป็น
-      - Deployment และ ReplicaSet
+      - Deployments และ ReplicaSet
         ใช้สำหรับ stateless application ได้เป็นอย่างดีเพราะว่าทุก ๆ pod ใน deployment นั้นสามารถแทนที่กันได้
         และรองรับการ update ที่ไม่มี downtime
       - StatefulSet
@@ -489,9 +489,221 @@ Infrastructure ที่ได้รับการปรับปรุงใ�
         ```
     2. Monitoring Tool
     - Challenging in Monitoring kubernetes
+      ```
+      Kubernetes มี components ด้านในที่ซับซ้อนกว่า infrastructure แบบเดิมมากทำให้ยากที่จะตรวจสอบปัญหาว่า
+      เกิดขึ้นจากสาเหตุไหนระหว่าง Kubernetes components
+      1. มี metric มากมายใน Kubernetes cluster
+        ความซับซ้อนของ component ภายใน เช่น 1 node มีหลาย pods และใน 1 pods อาจจะมีหลาย containers ภายใน
+        และแต่ละ pod ก็มีหน้าที่ของมันเองทำให้เกิด metrics ของ pods ขึ้นมาจำนวนมาก หรือใน 1 application ที่ทำการติดตั้ง
+        นั้นมีจำนวน pod มากกว่า 1 และอยู่ข้าม node กัน 
 
+        ทุก ๆ ครั้งที่ pod ได้ถูกสร้างโดย kubelet จาก kube-scheduler แต่ละ pod จะมี metrics ของตัวมันเองเสมอทำให้การเก็บข้อมูล
+        ของ pod นั้นทำได้ยากขึ้น
+
+        การ monitoring kubernetes เพื่อตรวจสอบปัญหาที่เกิดขึ้นภายในนั้นต้องการความรู้ความเข้าใจเกี่ยวกับด้าน software และ opeartion
+        เพื่อหาปัญหาและสาเหตุของปัญหา ดังนั้นการทำ monitoring ต้องรู้ว่า metrics ของ pod นั้น metrics ไหนมีคุณค่าเช่น crash loop, 
+        pod restart, CPU utilization, Memory Usage, Deadlock เพื่อแก้ไขไม่ให้มันเกิดขึ้นในอนาคต 
+      -------
+      2. ความไม่ถาวรของ pod
+        ใน Kubernetes component ที่เป็น DaemonSet, Deployments, Jobs และ StatefulSets ที่สามารถสร้าง pod ใหม่ได้ทันที
+        เมื่อ pod เก่านั้นเกิดปัญหาขึ้นหรือเมื่อมีการ scale จำนวน pod เพิ่มขึ้นหรือเมื่อมีการ scale จำนวนของ pod ลงก็จะมี pod ที่หายไปตลอดกาล
+
+        Kubernetes สามารถย้าย pod โดยการสร้างใหม่และลบของเก่าทิ้งเพื่อทำให้ node มีทรัพยากรที่มากขึ้นและไปสร้าง pod 
+        ที่มีชนิดเดียวกันแต่คนละชื่อและอาจจะอยู่คนละที่ใน node อื่นแทน
+      -------
+      3. ไม่สามารถดูรูปร่างระบบได้อย่างชัดเจน
+        ในสถาปัตยกรรมแบบ microservice ได้มีการแบ่ง application ออกเป็น service ย่อย ๆ ตาม core function ของระบบดังนั้น 
+        service ก็จะถูกออกแบบมาให้ไม่ขึ้นต่อกันโดยเมื่อมีการเปลี่ยนแปลง 1 service จะไม่กระทบต่อ service อื่น
+        การเชื่อมต่อภายใน Kubernetes ก็จะวิ่งภายใน virtual network
+        
+        ใน stateless application ที่ถูกออกแบบใน microservice มีประโยชน์ในการทำ horizontally scaling เป็นอย่างมากเนื่องจาก
+        สามารถ scale จำนวนของ pod ขึ้นมาได้เรื่อย ๆ ตามความต้องการและทรัพยากรที่มี
+        จากข้อ 2. ความไม่ถาวรของ pod เมื่อต้อง ถ้าต้องการรับ request มากขึ้นก็ทำการ scale ขึ้นและเมื่อไม่มีกีการใช้งานจะ scale ลง
+        ทำให้การรู้ภาพรวมของระบบนั้นเป็นทำได้ยากขึ้น
+      ```
+      <!-- Microservice ไม่จำเป็นต้องเป็น stateless และ stateless ไม่จำเป็นต้องเป็น microservice -->
     - Prometheus
-    - Grafana
+      - What is prometheus
+        ```txt
+        เป็นเครื่องมือที่ใช้ในการ monitoring infrastructure หรือ service ที่เหมาะสมกับ infrastructure ที่มีความซับซ้อนเช่น
+        Kubernetes
+        ```
+      - Prometheus architecture
+
+        ![prometheus-architecture](./media/prometheus-architecture.png)
+        <!-- https://prometheus.io/ -->
+
+        1. Service
+            ```txt
+            คือ application ที่ต้องการเก็บข้อมูล metric
+            ```
+        2. Service Exporter
+            ```txt
+            คือ software ที่ช่วยในการดึง metrics ให้อยู่ในรูปแบบที่ prometheus สามารถนำมาใช้งานได้
+            ```
+        3. Push Gateway
+            ```txt
+            คือ ที่เก็บ metrics สำหรับงานที่ทำในช่วงเวลา ๆ สั้น ๆ แล้วหายไปเนื่องจาก prometheus อาจจะยังไม่มาดึงเอา metrics ไป
+            จึงจำเป็นต้องเก็บไว้ใน Push Gateway ก่อน
+            ```
+        4. Prometheus Server
+            ```txt
+            ที่รวมการทำงานของ Prometheus component
+            ```
+        5. ServiceMonitor
+            ```txt
+            คือ custom resource ของ Kubernetes โดยใช้สำหรับการทำ Auto Discovery หา service ที่เพิ่มขึ้นมาใหม่โดย
+            ไม่ต้องทำการแก้ไข Prometheus configuration file
+            ```
+        6. Alertmanager
+            ```txt
+            คือ software ทำหน้าที่จัดการการแจ้งเตือนไปยังผู้มีส่วนเกี่ยวข้องกับระบบ โดยจะมี concept การทำงานคือ
+            grouping, inhibition, silences, client behavior, high availability
+            ``` 
+            1. Grouping
+                ```txt
+                คือ การจัดกลุ่มของ alert ให้เป็นกลุ่มเดียวกัน เช่น application A มี pod1, pod2, pod3 แล้วทั้ง 3 pod ไม่สามารถ
+                เชื่อมต่อฐานข้อมูลได้ก็จะมีการยิง alert เพียงแค่ครั้งเดียวคือของ application A
+                ```
+            2. Inhibition
+                ```txt
+                คือ การยับยั้งการแจ้งเตือนที่เกี่ยวข้องกัน เช่น กรณีที่ไม่ cluster ไม่สามารถเชื่อมต่อได้ก็จะแจ้งเตือนมา 1 แจ้งเตือนไม่มีแจ้ง
+                เตือนอื่น ๆ เกี่ยวกับของใน cluster
+                ```
+            3. Silences
+                ```txt
+                คือ การเช็คว่า alert ที่ prometheus ส่งมาให้นั้นเข้ากับเงื่อนไขที่จะส่งการแจ้งเตือนหรือไม่
+                ```
+            4. Clent Behavior
+                ```txt
+                คือ การตั้งค่าการแจ้งเตือนกับ request ที่ Prometheus ส่งมา
+                ```
+            5. High Availability
+                ```txt
+                คือ ความสามารถทำ Alertmanager ให้เป็น cluster ได้
+                ```
+
+            ```yaml
+            alertmanager_version: 0.21.0
+            alertmanager_config_dir: /etc/alertmanager
+            alertmanager_db_dir: /var/lib/alertmanager
+            alertmanager_slack_api_url: 'https://hooks.slack.com/services/ABCDEFGH/IJKLMNOPQSTUV/WXYZABCDEFGHIJK'
+            alertmanager_template_files: 
+              - 'groups/platform_prod_monitoring/template/*.yaml'
+
+            alertmanager_http_config:
+              proxy_url: "http://username:password@proxy_address:8080/"
+
+            alertmanager_web_listen_address: 'localhost:9093'
+            alertmanager_web_external_url: 'http://localhost:9093/alertmanager'
+
+            alertmanager_smtp: {}
+
+            alertmanager_receivers:
+            - name: default
+              slack_configs:
+              - send_resolved: true 
+                title: "{% raw %}{{ if eq .Status \"firing\" }}:warning:{{ else }}:heavy_check_mark:{{ end }} [{{ .Status | toUpper }}]{% endraw %}"
+                text: "{% raw %}{{ range .Alerts }}*Priority*: `{{ .Labels.severity | toUpper }}` \n{{ .Annotations.description }}\n{{ end }}{% endraw %}" 
+
+            alertmanager_route:
+              group_by: ['alertname', 'env', 'job', 'pod'] 
+              group_wait: 60s
+              group_interval: 30s
+              repeat_interval: 4h
+              receiver: default
+            ```
+
+            ตัวอย่าง alertmanager configuration 
+            <!-- https://prometheus.io/docs/alerting/latest/alertmanager/ -->
+        7. Grafana
+
+            ![grafana-haproxy-dashboard](./media/grafana-haproxy-dashboard.png)
+
+            ตัวอย่าง grafana-dashboard
+
+            ```txt
+            คือ software ที่ใช้สำหรับการทำ Data Visualization จาก metric ที่เก็บไว้ใน Time Series Database
+            ```
+
+      ```yaml
+      prometheus_web_listen_address: "0.0.0.0:9090"
+      prometheus_web_external_url: 'http://localhost:9090/prometheus'
+
+      prometheus_global:
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        evaluation_interval: 15s
+
+      prometheus_scrape_configs:
+        - job_name: prometheus
+          metrics_path: "{{ prometheus_metrics_path }}"
+          static_configs:
+            - targets:
+                - "{{ ansible_fqdn | default(ansible_host) | default('localhost') }}:9090"
+        - job_name: node
+          file_sd_configs:
+            - files:
+                - "{{ prometheus_config_dir }}/file_sd/node.yml"
+        - job_name: k8s-prod
+          scrape_interval: 15s
+          honor_labels: true
+          metrics_path: '/prometheus/federate'
+          scheme: https
+          tls_config:
+            insecure_skip_verify: true
+          params:
+            'match[]':
+              - '{job="kube-state-metrics"}'
+              - '{job="kubelet"}'
+              - '{job="kubernetes-service-endpoints"}'
+              - '{job="k8s-blackbox"}'
+              - '{job="k8s-blackbox-invoker"}'
+          static_configs:
+            - targets:
+              - "api.co.th"
+              labels:
+                env: production
+                project: project-name
+                type: k8s
+                service: k8s
+          metric_relabel_configs:
+            - source_labels: [job]
+              regex: 'kubernetes-service-endpoints'
+              action: replace
+              target_label: job
+              replacement: prod-k8s-node-exporter
+        - job_name: node-exporter
+          metrics_path: /metrics
+          static_configs:
+          - targets: ['nexus.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname:  nexus.co.th
+          - targets: ['jenkins.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: jenkins.co.th
+          - targets: ['pgkong1.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: pgkong1.co.th
+          - targets: ['pgkong2.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: pgkong2.co.th
+          - targets: ['graylog.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: graylog.co.th
+      ```
+      - ตัวอย่าง prometheus configuration
+
     3. Logging Tool
     - Challenging in Logging kubernetes
     - Fluentbig
