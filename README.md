@@ -1040,17 +1040,39 @@ Log-based software monitoring: a systematic mapping study
 
     ![system-prometheus-network-port-schematics](./media/system-prometheus-network-port-schematics.png)
 
-    ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Graylog cluster
+    ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Prometheus server
 
 ### 3.4 สถาปัตยกรรมของระบบ (ภาพรวมของระบบ อธิบายถึงการใช้เทคโนโลยีอะไรบ้าง)
 
-### 3.5 ภาพรวมของแอปพลิเคชัน
+- รูปภาพรวมระบบ
+
+    ![system-architecture](./media/system-architecture.png)
+
+    ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Prometheus server
+
+- ระบบ monitoring
+
+  - ระบบ metrics
+
+    ![system-monitoring-metrics-architecture](./media/system-monitoring-metrics-architecture.png)
+
+  - ระบบ logging
+
+    ![system-monitoring-log-architecture](./media/system-monitoring-log-architecture.png)
+
+- ระบบ alerting
+
+    ![system-monitoring-alerting-architecture](./media/system-monitoring-alerting-architecture.png)
+
+- ระบบ visualization
+
+  - grafana
 
 ## 4 ผลการวิจัย
 
 (รายละเอียดของผลการทำงานของระบบ ดีขึ้นจากแต่เดิมอย่างไร ด้วยตัวเลขเท่าไหร่ นำข้อมูลมาเปรียบเทียบกัน สำเร็จกี่เปอร์เซ็นต์ ล้มเหลวกี่เปอร์เซ็นต์)
 
-### 5 สรุปผลการวิจัยและข้อเสนอแนะ
+## 5 สรุปผลการวิจัยและข้อเสนอแนะ
 
 (วิเคราะห์ระบบที่สร้าง ข้อดี ข้อเสีย สาเหตุ การแก้ไข ข้อเสนอแนะ)
 
