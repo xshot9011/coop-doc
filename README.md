@@ -1063,17 +1063,31 @@ Log-based software monitoring: a systematic mapping study
 
     ในส่วนของ Graylog จะมี HAProxy ทำหน้าที่เหมือน load balancer ส่งต่อข้อมูลไปยัง Graylog Cluster แล้ว Graylog จะทำการส่งข้อมูลที่ได้รับการประมวลผลแล้วเรียบร้อยส่งไปเก็บที่ Elasticsearch
 
-- รูป network port schematics ของส่วน kubernetes
+    ในส่วนของเครื่อง Prometheus จะทำหน้าที่ในการรวมและจัดเก็บ metrics ของระบบทั้งหมด
+
+- รูป network port schematics ของส่วน Kubernetes
 
     ![system-kubernetes-network-port-schematics](./media/system-kubernetes-network-port-schematics.png)
 
     ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Kubernetes cluster
+
+    ในส่วนของ Kubernetes cluster จะมี HAProxy ที่ทำหน้าที่ส่งต่อคำร้องขอไปยังปลายทางจากตัวมันโดยการเชื่อมต่อกับ worker node ภายใน Kubernetes cluster จริง ๆ แล้วสามารถวิ่งเข้าที่ worker node ไหนก็ได้เนื่องจากความสามารถในการทำ network overlay ของ Kubernetes
+
+    การเข้าควบคุม Kubernetes cluster สามารถวิ่งเข้าผ่านทาง port 6443 ของ HAProxy เพื่อให้ HAProxy ส่งต่อคำร้องขอไปยัง kube-api-server เพื่อจัดการ cluster ได้
+
+    ภายใน woker node จะมี ingress-controller ที่ถูกติดตั้งใช้งานแบบ daemon-set ทำหน้าที่ในการจับคู่ domain ที่วิ่งเข้ามาไปยัง service ภายในที่เหมาะสม
 
 - รูป network port schematics ของส่วน Graylog cluster
 
     ![system-graylog-network-port-schematics](./media/system-graylog-network-port-schematics.png)
 
     ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Graylog cluster
+
+    ในส่วนของ Graylog cluster จะมีการทำเป็น cluster ซึ่งภายในจะประกอบด้วย graylog server ที่คอยรับ logs หรือ request ที่วิ่งเข้ามายัง graylogs ซึ่งแต่ละตัวจะมีการเก็บ configuration ไว้ที่ MongoDB ที่ทำหน้าที่เป็น ReplicaSet ทำให้รองรับการ replicate configuration ไปยัง MongoDB อื่น ๆ ภายในได้
+
+    หลังจากที่ graylog server ได้ทำการจัดการข้อมูลเกี่ยวกับ logs เรียบแล้วก็จะทำการส่งข้อมูลที่ตรงเงื่อนไขเข้าไปเก็บยัง Elasticsearch 1 ใน Elasticsearch cluster
+
+    การประกอบ cluster ของแต่ละเครื่องมือเช่น Graylog, MongoDB และ Elasticsearch ทำให้ระบบมีความสามารถในการทำ High Availability (HA) ที่สูง
   
 - รูป network port schematics ของส่วน Prometheus server
 
@@ -1081,13 +1095,15 @@ Log-based software monitoring: a systematic mapping study
 
     ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Prometheus server
 
+    ในส่วนของ Prometheus ที่อยู่นอก Kubernetes cluster จะทำหน้าที่เป็นตัว Centralized Management คือมีการเก็บ Metrics ของ service ทั้งภายในและภายนอก Kubernetes ทั้งหมดไว้ในนี้ เพื่อให้สามารถทำการประมวลผลข้อมูล Metrics ที่มาในรูปแบบ Time-Series และสามารถวิเคราะห์การใช้งานเพื่อรองรับการขยายได้ในอนาคต
+
 ### 3.4 สถาปัตยกรรมของระบบ (ภาพรวมของระบบ อธิบายถึงการใช้เทคโนโลยีอะไรบ้าง)
 
 - รูปภาพรวมระบบ
 
     ![system-architecture](./media/system-architecture.png)
 
-    ภาพแสดงการใช้งาน port และ protolcol ในส่วนของการเชื่อมต่อกับ Prometheus server
+
 
 - ระบบ monitoring
 
