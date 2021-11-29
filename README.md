@@ -49,6 +49,14 @@
 
 **********************************************************
 
+1. กล่าวนำเข้าถึงวัตถุประสงค์ และ หรือ สมมุติฐานของการวิจัย
+2. ระบุลำดับขั้นตอนในการรวบรวมข้อมูล
+3. บรรยายลักษณะของประชากร กลุ่มเป้าหมาย ของงานวิจัยให้ชัดเจนโดยการอ้างอิง มีการกล่าวถึงเครื่องมือที่ใช้ และอธิบายเหตุผลสำคัญ
+4. แสดงวิธีการวิเคราะห์ข้อมูล และการนำเสนอ
+5. สรุปวิธีการดำเนินการวิจัย
+
+**********************************************************
+
 ### 1.5 ประโยชน์ที่คาดว่าจะได้รับ
 
 Infrastructure ที่ได้รับการปรับปรุงให้ทันสมัย พร้อมกับระบบตรวจสอบและแจ้งเตือนปัญหาก่อนที่จะเกิดขึ้น เพื่อให้มีความ high avalability ที่สูงและสามารถรองรับ wokrload ได้เป็นจำนวนมาก
@@ -513,7 +521,7 @@ Infrastructure ที่ได้รับการปรับปรุงใ�
           โดยสามารถมองได้หลายมุมมอง เช่น SRE นั้นคือการนำ DevOps มาใช้งานพร้อมกับเพิ่มรายละเอียดอื่น ๆ ขึ้นมา
           หรือ DevOps คือลักษณะทั่วไปของหลักการใน SRE หลาย ๆ เรื่อง 
           ```
-- 2.1.5 Monitoring Tool
+- 2.1.5 Challenging in Monitoring
   - 2.1.5.1 Challenging in Monitoring Metrics kubernetes
       ```txt
       Kubernetes มี components ด้านในที่ซับซ้อนกว่า infrastructure แบบเดิมมากทำให้ยากที่จะตรวจสอบปัญหาว่า
@@ -573,320 +581,6 @@ Infrastructure ที่ได้รับการปรับปรุงใ�
         ใน Kubernetes มี component มากมายและแต่ละอันก็มี log ที่แตกต่างกันไปดังนั้นต้องทำความเข้าใจเกี่ยวกับ log ของ component
         และวิธีการใช้งานมัน
         ```
-  - 2.1.5.3Prometheus
-    - What is prometheus
-
-      ![prometheus-logo](./media/prometheus-logo.png)
-      
-      https://prometheus.io/
-
-      logo ของ prometheus
-      ```txt
-      คือ เครื่องมือที่นิยมใช้ในการ monitoring metrics ของ infrastructure หรือ service ถูกออกแบบมาให้สามารถใช้งาน
-      กับ infrastructure ที่มีความซับซ้อนเช่น Kubernetes
-      ```
-    - Prometheus architecture
-      ![prometheus-architecture](./media/prometheus-architecture.png)
-      1. Service
-          ```txt
-          คือ application ที่ต้องการเก็บข้อมูล metric
-          ```
-      2. Service Exporter
-          ```txt
-          คือ software ที่ช่วยในการดึง metrics ให้อยู่ในรูปแบบที่ prometheus สามารถนำมาใช้งานได้
-          ```
-      3. Push Gateway
-          ```txt
-          คือ ที่เก็บ metrics สำหรับงานที่ทำในช่วงเวลา ๆ สั้น ๆ แล้วหายไปเนื่องจาก prometheus อาจจะยังไม่มาดึงเอา metrics ไป
-          จึงจำเป็นต้องเก็บไว้ใน Push Gateway ก่อน
-          ```
-      4. Prometheus Server
-          ```txt
-          ที่รวมการทำงานของ Prometheus component
-          ```
-      5. ServiceMonitor
-          ```txt
-          คือ custom resource ของ Kubernetes โดยใช้สำหรับการทำ Auto Discovery หา service ที่เพิ่มขึ้นมาใหม่โดย
-          ไม่ต้องทำการแก้ไข Prometheus configuration file
-          ```
-      6. Alertmanager
-          ```txt
-          คือ software ทำหน้าที่จัดการการแจ้งเตือนไปยังผู้มีส่วนเกี่ยวข้องกับระบบ โดยจะมี concept การทำงานคือ
-          grouping, inhibition, silences, client behavior, high availability
-          ``` 
-          1. Grouping
-              ```txt
-              คือ การจัดกลุ่มของ alert ให้เป็นกลุ่มเดียวกัน เช่น application A มี pod1, pod2, pod3 แล้วทั้ง 3 pod ไม่สามารถ
-              เชื่อมต่อฐานข้อมูลได้ก็จะมีการยิง alert เพียงแค่ครั้งเดียวคือของ application A
-              ```
-          2. Inhibition
-              ```txt
-              คือ การยับยั้งการแจ้งเตือนที่เกี่ยวข้องกัน เช่น กรณีที่ไม่ cluster ไม่สามารถเชื่อมต่อได้ก็จะแจ้งเตือนมา 1 แจ้งเตือนไม่มีแจ้ง
-              เตือนอื่น ๆ เกี่ยวกับของใน cluster
-              ```
-          3. Silences
-              ```txt
-              คือ การเช็กว่า alert ที่ prometheus ส่งมาให้นั้นเข้ากับเงื่อนไขที่จะส่งการแจ้งเตือนหรือไม่
-              ```
-          4. Clent Behavior
-              ```txt
-              คือ การตั้งค่าการแจ้งเตือนกับ request ที่ Prometheus ส่งมา
-              ```
-          5. High Availability
-              ```txt
-              คือ ความสามารถทำ Alertmanager ให้เป็น cluster ได้
-              ```
-          ```yaml
-          alertmanager_version: 0.21.0
-          alertmanager_config_dir: /etc/alertmanager
-          alertmanager_db_dir: /var/lib/alertmanager
-          alertmanager_slack_api_url: 'https://hooks.slack.com/services/ABCDEFGH/IJKLMNOPQSTUV/WXYZABCDEFGHIJK'
-          alertmanager_template_files: 
-            - 'groups/platform_prod_monitoring/template/*.yaml'
-
-          alertmanager_http_config:
-            proxy_url: "http://username:password@proxy_address:8080/"
-
-          alertmanager_web_listen_address: 'localhost:9093'
-          alertmanager_web_external_url: 'http://localhost:9093/alertmanager'
-
-          alertmanager_smtp: {}
-
-          alertmanager_receivers:
-          - name: default
-            slack_configs:
-            - send_resolved: true 
-              title: "{% raw %}{{ if eq .Status \"firing\" }}:warning:{{ else }}:heavy_check_mark:{{ end }} [{{ .Status | toUpper }}]{% endraw %}"
-              text: "{% raw %}{{ range .Alerts }}*Priority*: `{{ .Labels.severity | toUpper }}` \n{{ .Annotations.description }}\n{{ end }}{% endraw %}" 
-
-          alertmanager_route:
-            group_by: ['alertname', 'env', 'job', 'pod'] 
-            group_wait: 60s
-            group_interval: 30s
-            repeat_interval: 4h
-            receiver: default
-          ```
-          - ตัวอย่าง alertmanager configuration 
-          <!-- https://prometheus.io/docs/alerting/latest/alertmanager/ -->
-      7. Grafana
-
-          ![grafana-haproxy-dashboard](./media/grafana-haproxy-dashboard.png)
-
-          - ตัวอย่าง grafana-dashboard
-
-          ```txt
-          คือ software ที่ใช้สำหรับการทำ Data Visualization จาก metric ที่เก็บไว้ใน Time Series Database
-          ```
-    ```yaml
-    prometheus_web_listen_address: "0.0.0.0:9090"
-    prometheus_web_external_url: 'http://localhost:9090/prometheus'
-
-    prometheus_global:
-      scrape_interval: 15s
-      scrape_timeout: 10s
-      evaluation_interval: 15s
-
-    prometheus_scrape_configs:
-      - job_name: prometheus
-        metrics_path: "{{ prometheus_metrics_path }}"
-        static_configs:
-          - targets:
-              - "{{ ansible_fqdn | default(ansible_host) | default('localhost') }}:9090"
-      - job_name: node
-        file_sd_configs:
-          - files:
-              - "{{ prometheus_config_dir }}/file_sd/node.yml"
-      - job_name: k8s-prod
-        scrape_interval: 15s
-        honor_labels: true
-        metrics_path: '/prometheus/federate'
-        scheme: https
-        tls_config:
-          insecure_skip_verify: true
-        params:
-          'match[]':
-            - '{job="kube-state-metrics"}'
-            - '{job="kubelet"}'
-            - '{job="kubernetes-service-endpoints"}'
-            - '{job="k8s-blackbox"}'
-            - '{job="k8s-blackbox-invoker"}'
-        static_configs:
-          - targets:
-            - "api.co.th"
-            labels:
-              env: production
-              project: project-name
-              type: k8s
-              service: k8s
-        metric_relabel_configs:
-          - source_labels: [job]
-            regex: 'kubernetes-service-endpoints'
-            action: replace
-            target_label: job
-            replacement: prod-k8s-node-exporter
-      - job_name: node-exporter
-        metrics_path: /metrics
-        static_configs:
-        - targets: ['nexus.co.th:9100']
-          labels:
-            env: production
-            project: project-name
-            hostname:  nexus.co.th
-        - targets: ['jenkins.co.th:9100']
-          labels:
-            env: production
-            project: project-name
-            hostname: jenkins.co.th
-        - targets: ['pgkong1.co.th:9100']
-          labels:
-            env: production
-            project: project-name
-            hostname: pgkong1.co.th
-        - targets: ['pgkong2.co.th:9100']
-          labels:
-            env: production
-            project: project-name
-            hostname: pgkong2.co.th
-        - targets: ['graylog.co.th:9100']
-          labels:
-            env: production
-            project: project-name
-            hostname: graylog.co.th
-    ```
-    - ตัวอย่าง prometheus configuration
-  - 2.1.5.4 FluentBit
-    - What is FluentBit
-
-      ![fluentbit-logo](./media/fluentbit-logo.png)
-
-      - logo ของ fluentbit 
-      
-      https://fluentbit.io/
-      ```
-      คือ open source log processor and forwarder โดยสามารถเก็บ log จากหลาย ๆ แหล่งและทำการประมวลผลจัดรูปแบบ log
-      ให้เป็นมาตรฐานเดียวกันก่อนจะส่งไปยังที่เก็บเก็บปลายทางโดยไม่ต้องแก้ไข application ที่ติดตั้งไปแล้ว
-      ```
-    - การทำงานของ Fluentbit
-
-      ![fluentbit-pipeline](./media/fluentbit-pipeline.png)
-
-      1. Input
-          ```txt
-          คือ สิ่งที่ Fluentbit จะไปเก็บ log
-          ```
-      2. Parser
-          ```txt
-          คือ การเปลี่ยน structure ของ log ให้อยู่ในรูปแบบที่กำหนด
-          ```
-      3. Filter
-          ```txt
-          คือ การเติมแต่ง log ด้วย metadata ของ Kubernetes
-          ```
-      4. Buffer
-          ```txt
-          คือ การจัดเก็บ log ที่ทำการประมวลผลไว้แล้วก่อนจะทำการส่งไปยัง database ที่เกี่ยวข้อง
-          ```
-      5. Routing
-          ```txt
-          คือ การจัดการเส้นทางที่จะส่ง log นั้นไปยัง database
-          ```
-    ```yaml
-    [INPUT]
-    Name              tail
-    Tag               kube.*
-    Path              /var/log/containers/*.log
-    DB                /var/log/flb_kube.db
-    Parser            docker
-    Docker_Mode       On
-    Mem_Buf_Limit     100MB
-    Skip_Long_Lines   On
-    Refresh_Interval  1
-
-    [FILTER]
-    Name                kubernetes
-    Match               kube.*
-    Kube_URL            https://organiztion-production.cluster.local:443
-    Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
-    Merge_Log           On
-    Buffer_Size         0
-    Use_Kubelet         true
-    Kubelet_Port        10250
-    ```
-    - ตัวอย่างการกำหนดค่าทำงานของ Fluentbit ในส่วนของ Input และ Filter
-  - 2.1.5.5 Graylog
-
-    ![graylog-logo](./media/graylog-logo.png)
-    
-    https://www.graylog.org/
-    - What is Graylog
-        ```txt
-        คือ เป็นเครื่องมือที่ใช้ในการเก็บและวิเคราะห์ log แบบรวมไว้ที่ศูนย์กลาง
-        ```
-    - Graylog architecture
-
-      ![graylog-production-architecture](./media/graylog-production-architecture.png)
-
-      1. Graylog Server
-          ```txt
-          คือ เครื่องมือที่ใช้ในการจัดการข้อมูลชุดตัวอักษรและนำมาคัดแยกแลกวิเคราะห์ตามที่ผู้ใช้งานเป็นคนกำหนดและยังสามารถ
-          เปิดใช้เครื่องมือการค้นหาแบบกำหนดเองทำให้สามารถวิเคราะห์พฤติกรรมของแอปพลิเคชันได้
-          ```
-      2. MongoDB
-
-          ![monogodb-logo](./media/mogodb-logo.jpg)
-
-          https://www.glurgeek.com/education/mongodb-%E0%B8%AD%E0%B8%B5%E0%B8%81%E0%B8%AB%E0%B8%99%E0%B8%B6%E0%B9%88%E0%B8%87%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%9A/
-
-          ```txt
-          คือ NoSQL database ที่ใช้ในการจัดเก็บข้อมูล metadata ของ graylog server
-          ```
-      3. Elasticsearch
-          ```txt
-          คือ database ที่ถูกใช้งานในการเก็บข้อมูลชุดตัวอักษรและมีความสามารถในการทำ search engine ในตัว
-          ถูกใช้ในการเก็บข้อมูลที่ถูกส่งมาจาก graylog
-          ```
-    ![graylog-web-page](./media/graylog-web-page.png)
-    - รูปหน้าต่าง UI ของ graylog
-  - 2.1.5.6 Jaeger
-    ![jaeger-logo](./media/jaeger-logo.png)
-
-    <!-- https://www.jaegertracing.io/docs/1.28/architecture/#:~:text=The%20Jaeger%20agent%20is%20a,collectors%20away%20from%20the%20client. -->
-
-    <!-- Jaeger instead of AWS X-RAY
-    https://life.wongnai.com/%E0%B8%A3%E0%B8%B5%E0%B8%94-microservice-performance-%E0%B8%9A%E0%B8%99-aws-%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-1-9a5581ba0c02 -->
-
-    - What is Jaeger
-        ```txt
-        เป็นเครื่องมือที่ใช้สำหรับการเก็บข้อมูลทางสถิติของ request ตั้งแต่เริ่มวิ่งเข้ามายังระบบจนวิ่งกลับไปหาผู้ใช้งานที่ถูกออกแบบมาให้สามารถใช้งานร่วมกับ Microservice ได้ดี
-        ```
-    - Jaeger architecture
-
-      ![jaeger-architecture](./media/jaeger-architecture.png)
-
-      1. Jaeger-client
-          ```txt
-          เป็นส่วนที่ทำหน้าที่สร้าง Trace และจัดการ span ภายในก่อนส่งไปให้ Jaeger-agent
-          ```
-      2. Jaeger-agent
-          ```txt
-          เป็นส่วนที่ service ของระบบจะทำการยิง Traces ไปให้
-          ```
-      3. Jaeger collector
-          ```txt
-          เป็นส่วนที่ทำหน้าที่เก็บรวมรวม Traces data ก่อนจะนำไปเก็บใน datastore
-          ```
-      4. Database
-          ```txt
-          เป็นที่เก็บข้อมูล Traces data ของ service ภายในระบบ
-          ```
-      5. Jaeger-query
-          ```txt
-          เป็นเครื่องมือที่ใช้ในการดึงเอา tracing data ไปแสดงผลในหน้าต่าง user interface (UI)
-          ```
-    
-    ![jaeger-web-page](./media/traces.jpg)  
-
 - 2.1.6 Key Performance Indicator (KPI) [1]
 
   https://kpilibrary.com/categories/systems
@@ -1087,23 +781,404 @@ Log-based software monitoring: a systematic mapping study
 
     ![system-monitoring-metrics-architecture](./media/system-monitoring-metrics-architecture.png)
 
+    - Prometheus
+      - What is prometheus
+
+        ![prometheus-logo](./media/prometheus-logo.png)
+        
+        https://prometheus.io/
+
+        logo ของ prometheus
+        ```txt
+        คือ เครื่องมือที่นิยมใช้ในการ monitoring metrics ของ infrastructure หรือ service ถูกออกแบบมาให้สามารถใช้งาน
+        กับ infrastructure ที่มีความซับซ้อนเช่น Kubernetes
+        ```
+      - Prometheus architecture
+
+        ![prometheus-architecture](./media/prometheus-architecture.png)
+        
+        1. Service
+            ```txt
+            คือ application ที่ต้องการเก็บข้อมูล metric
+            ```
+        2. Service Exporter
+            ```txt
+            คือ software ที่ช่วยในการดึง metrics ให้อยู่ในรูปแบบที่ prometheus สามารถนำมาใช้งานได้
+            ```
+        3. Push Gateway
+            ```txt
+            คือ ที่เก็บ metrics สำหรับงานที่ทำในช่วงเวลา ๆ สั้น ๆ แล้วหายไปเนื่องจาก prometheus อาจจะยังไม่มาดึงเอา metrics ไป
+            จึงจำเป็นต้องเก็บไว้ใน Push Gateway ก่อน
+            ```
+        4. Prometheus Server
+            ```txt
+            ที่รวมการทำงานของ Prometheus component
+            ```
+        5. ServiceMonitor
+            ```txt
+            คือ custom resource ของ Kubernetes โดยใช้สำหรับการทำ Auto Discovery หา service ที่เพิ่มขึ้นมาใหม่โดย
+            ไม่ต้องทำการแก้ไข Prometheus configuration file
+            ```
+        6. Alertmanager
+            ```txt
+            คือ software ทำหน้าที่จัดการการแจ้งเตือนไปยังผู้มีส่วนเกี่ยวข้องกับระบบ โดยจะมี concept การทำงานคือ
+            grouping, inhibition, silences, client behavior, high availability
+            ``` 
+            1. Grouping
+                ```txt
+                คือ การจัดกลุ่มของ alert ให้เป็นกลุ่มเดียวกัน เช่น application A มี pod1, pod2, pod3 แล้วทั้ง 3 pod ไม่สามารถ
+                เชื่อมต่อฐานข้อมูลได้ก็จะมีการยิง alert เพียงแค่ครั้งเดียวคือของ application A
+                ```
+            2. Inhibition
+                ```txt
+                คือ การยับยั้งการแจ้งเตือนที่เกี่ยวข้องกัน เช่น กรณีที่ไม่ cluster ไม่สามารถเชื่อมต่อได้ก็จะแจ้งเตือนมา 1 แจ้งเตือนไม่มีแจ้ง
+                เตือนอื่น ๆ เกี่ยวกับของใน cluster
+                ```
+            3. Silences
+                ```txt
+                คือ การเช็กว่า alert ที่ prometheus ส่งมาให้นั้นเข้ากับเงื่อนไขที่จะส่งการแจ้งเตือนหรือไม่
+                ```
+            4. Clent Behavior
+                ```txt
+                คือ การตั้งค่าการแจ้งเตือนกับ request ที่ Prometheus ส่งมา
+                ```
+            5. High Availability
+                ```txt
+                คือ ความสามารถทำ Alertmanager ให้เป็น cluster ได้
+                ```
+            ```yaml
+            alertmanager_version: 0.21.0
+            alertmanager_config_dir: /etc/alertmanager
+            alertmanager_db_dir: /var/lib/alertmanager
+            alertmanager_slack_api_url: 'https://hooks.slack.com/services/ABCDEFGH/IJKLMNOPQSTUV/WXYZABCDEFGHIJK'
+            alertmanager_template_files: 
+              - 'groups/platform_prod_monitoring/template/*.yaml'
+
+            alertmanager_http_config:
+              proxy_url: "http://username:password@proxy_address:8080/"
+
+            alertmanager_web_listen_address: 'localhost:9093'
+            alertmanager_web_external_url: 'http://localhost:9093/alertmanager'
+
+            alertmanager_smtp: {}
+
+            alertmanager_receivers:
+            - name: default
+              slack_configs:
+              - send_resolved: true 
+                title: "{% raw %}{{ if eq .Status \"firing\" }}:warning:{{ else }}:heavy_check_mark:{{ end }} [{{ .Status | toUpper }}]{% endraw %}"
+                text: "{% raw %}{{ range .Alerts }}*Priority*: `{{ .Labels.severity | toUpper }}` \n{{ .Annotations.description }}\n{{ end }}{% endraw %}" 
+
+            alertmanager_route:
+              group_by: ['alertname', 'env', 'job', 'pod'] 
+              group_wait: 60s
+              group_interval: 30s
+              repeat_interval: 4h
+              receiver: default
+            ```
+            - ตัวอย่าง alertmanager configuration 
+            <!-- https://prometheus.io/docs/alerting/latest/alertmanager/ -->
+        7. Grafana
+
+            ![grafana-haproxy-dashboard](./media/grafana-haproxy-dashboard.png)
+
+            - ตัวอย่าง grafana-dashboard
+
+            ```txt
+            คือ software ที่ใช้สำหรับการทำ Data Visualization จาก metric ที่เก็บไว้ใน Time Series Database
+            ```
+      ```yaml
+      prometheus_web_listen_address: "0.0.0.0:9090"
+      prometheus_web_external_url: 'http://localhost:9090/prometheus'
+
+      prometheus_global:
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        evaluation_interval: 15s
+
+      prometheus_scrape_configs:
+        - job_name: prometheus
+          metrics_path: "{{ prometheus_metrics_path }}"
+          static_configs:
+            - targets:
+                - "{{ ansible_fqdn | default(ansible_host) | default('localhost') }}:9090"
+        - job_name: node
+          file_sd_configs:
+            - files:
+                - "{{ prometheus_config_dir }}/file_sd/node.yml"
+        - job_name: k8s-prod
+          scrape_interval: 15s
+          honor_labels: true
+          metrics_path: '/prometheus/federate'
+          scheme: https
+          tls_config:
+            insecure_skip_verify: true
+          params:
+            'match[]':
+              - '{job="kube-state-metrics"}'
+              - '{job="kubelet"}'
+              - '{job="kubernetes-service-endpoints"}'
+              - '{job="k8s-blackbox"}'
+              - '{job="k8s-blackbox-invoker"}'
+          static_configs:
+            - targets:
+              - "api.co.th"
+              labels:
+                env: production
+                project: project-name
+                type: k8s
+                service: k8s
+          metric_relabel_configs:
+            - source_labels: [job]
+              regex: 'kubernetes-service-endpoints'
+              action: replace
+              target_label: job
+              replacement: prod-k8s-node-exporter
+        - job_name: node-exporter
+          metrics_path: /metrics
+          static_configs:
+          - targets: ['nexus.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname:  nexus.co.th
+          - targets: ['jenkins.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: jenkins.co.th
+          - targets: ['pgkong1.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: pgkong1.co.th
+          - targets: ['pgkong2.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: pgkong2.co.th
+          - targets: ['graylog.co.th:9100']
+            labels:
+              env: production
+              project: project-name
+              hostname: graylog.co.th
+      ```
+      - ตัวอย่าง prometheus configuration
+
   - ระบบ logging
 
     ![system-monitoring-logs-architecture](./media/system-monitoring-logs-architecture.png)
 
+    - FluentBit
+      - What is FluentBit
+
+        ![fluentbit-logo](./media/fluentbit-logo.png)
+
+        - logo ของ fluentbit 
+        
+        https://fluentbit.io/
+        ```
+        คือ open source log processor and forwarder โดยสามารถเก็บ log จากหลาย ๆ แหล่งและทำการประมวลผลจัดรูปแบบ log
+        ให้เป็นมาตรฐานเดียวกันก่อนจะส่งไปยังที่เก็บเก็บปลายทางโดยไม่ต้องแก้ไข application ที่ติดตั้งไปแล้ว
+        ```
+      - การทำงานของ Fluentbit
+
+        ![fluentbit-pipeline](./media/fluentbit-pipeline.png)
+
+        1. Input
+            ```txt
+            คือ สิ่งที่ Fluentbit จะไปเก็บ log
+            ```
+        2. Parser
+            ```txt
+            คือ การเปลี่ยน structure ของ log ให้อยู่ในรูปแบบที่กำหนด
+            ```
+        3. Filter
+            ```txt
+            คือ การเติมแต่ง log ด้วย metadata ของ Kubernetes
+            ```
+        4. Buffer
+            ```txt
+            คือ การจัดเก็บ log ที่ทำการประมวลผลไว้แล้วก่อนจะทำการส่งไปยัง database ที่เกี่ยวข้อง
+            ```
+        5. Routing
+            ```txt
+            คือ การจัดการเส้นทางที่จะส่ง log นั้นไปยัง database
+            ```
+      ```yaml
+      [INPUT]
+      Name              tail
+      Tag               kube.*
+      Path              /var/log/containers/*.log
+      DB                /var/log/flb_kube.db
+      Parser            docker
+      Docker_Mode       On
+      Mem_Buf_Limit     100MB
+      Skip_Long_Lines   On
+      Refresh_Interval  1
+
+      [FILTER]
+      Name                kubernetes
+      Match               kube.*
+      Kube_URL            https://organiztion-production.cluster.local:443
+      Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+      Merge_Log           On
+      Buffer_Size         0
+      Use_Kubelet         true
+      Kubelet_Port        10250
+      ```
+      - ตัวอย่างการกำหนดค่าทำงานของ Fluentbit ในส่วนของ Input และ Filter
+    - Graylog
+
+      ![graylog-logo](./media/graylog-logo.png)
+      
+      https://www.graylog.org/
+      - What is Graylog
+          ```txt
+          คือ เป็นเครื่องมือที่ใช้ในการเก็บและวิเคราะห์ log แบบรวมไว้ที่ศูนย์กลาง
+          ```
+      - Graylog architecture
+
+        ![graylog-production-architecture](./media/graylog-production-architecture.png)
+
+        1. Graylog Server
+            ```txt
+            คือ เครื่องมือที่ใช้ในการจัดการข้อมูลชุดตัวอักษรและนำมาคัดแยกแลกวิเคราะห์ตามที่ผู้ใช้งานเป็นคนกำหนดและยังสามารถ
+            เปิดใช้เครื่องมือการค้นหาแบบกำหนดเองทำให้สามารถวิเคราะห์พฤติกรรมของแอปพลิเคชันได้
+            ```
+        2. MongoDB
+
+            ![monogodb-logo](./media/mogodb-logo.jpg)
+
+            https://www.glurgeek.com/education/mongodb-%E0%B8%AD%E0%B8%B5%E0%B8%81%E0%B8%AB%E0%B8%99%E0%B8%B6%E0%B9%88%E0%B8%87%E0%B9%81%E0%B8%99%E0%B8%A7%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%80%E0%B8%81%E0%B9%87%E0%B8%9A/
+
+            ```txt
+            คือ NoSQL database ที่ใช้ในการจัดเก็บข้อมูล metadata ของ graylog server
+            ```
+        3. Elasticsearch
+            ```txt
+            คือ database ที่ถูกใช้งานในการเก็บข้อมูลชุดตัวอักษรและมีความสามารถในการทำ search engine ในตัว
+            ถูกใช้ในการเก็บข้อมูลที่ถูกส่งมาจาก graylog
+            ```
+      ![graylog-web-page](./media/graylog-web-page.png)
+      - รูปหน้าต่าง UI ของ graylog
   - ระบบ Tracing
 
     ![system-monitoring-traces-architecture](./media/system-monitoring-traces-architecture.png)
 
+    - Jaeger
+      ![jaeger-logo](./media/jaeger-logo.png)
+
+      <!-- https://www.jaegertracing.io/docs/1.28/architecture/#:~:text=The%20Jaeger%20agent%20is%20a,collectors%20away%20from%20the%20client. -->
+
+      <!-- Jaeger instead of AWS X-RAY
+      https://life.wongnai.com/%E0%B8%A3%E0%B8%B5%E0%B8%94-microservice-performance-%E0%B8%9A%E0%B8%99-aws-%E0%B8%95%E0%B8%AD%E0%B8%99%E0%B8%97%E0%B8%B5%E0%B9%88-1-9a5581ba0c02 -->
+
+      - What is Jaeger
+          ```txt
+          เป็นเครื่องมือที่ใช้สำหรับการเก็บข้อมูลทางสถิติของ request ตั้งแต่เริ่มวิ่งเข้ามายังระบบจนวิ่งกลับไปหาผู้ใช้งานที่ถูกออกแบบมาให้สามารถใช้งานร่วมกับ Microservice ได้ดี
+          ```
+      - Jaeger architecture
+
+        ![jaeger-architecture](./media/jaeger-architecture.png)
+
+        1. Jaeger-client
+            ```txt
+            เป็นส่วนที่ทำหน้าที่สร้าง Trace และจัดการ span ภายในก่อนส่งไปให้ Jaeger-agent
+            ```
+        2. Jaeger-agent
+            ```txt
+            เป็นส่วนที่ service ของระบบจะทำการยิง Traces ไปให้
+            ```
+        3. Jaeger collector
+            ```txt
+            เป็นส่วนที่ทำหน้าที่เก็บรวมรวม Traces data ก่อนจะนำไปเก็บใน datastore
+            ```
+        4. Database
+            ```txt
+            เป็นที่เก็บข้อมูล Traces data ของ service ภายในระบบ
+            ```
+        5. Jaeger-query
+            ```txt
+            เป็นเครื่องมือที่ใช้ในการดึงเอา tracing data ไปแสดงผลในหน้าต่าง user interface (UI)
+            ```
+      
+      ![jaeger-web-page](./media/traces.jpg)  
+
 - ระบบ alerting
 
     ![system-monitoring-alerting-architecture](./media/system-monitoring-alerting-architecture.png)
+
+  - อยู่ในส่วนของ Alertmanager ที่อยู่ภายในเครื่อง Prometheus โดยการกำหนดกฎที่จะใช้แจ้งเตือนได้
+
+    ```yaml
+    groups:
+      - name: node-exporter
+        rules:
+        - alert: HostHighCpuLoad
+          expr: 100 - ((irate(node_cpu_seconds_total{mode="idle"}[10m])) * 100) >= 90
+          for: 30m
+          labels:
+            severity: warning
+            alertType: infra-service
+          annotations:
+            description: "CPU load is > 90%\n {{ $labels.hostname }} : {{ $labels.instance }}"
+            summary: "Host high CPU load (instance {{ $labels.instance }})"
+        - alert: HostHighCpuLoad
+          expr: 100 - ((irate(node_cpu_seconds_total{mode="idle"}[10m])) * 100) >= 95
+          for: 20m
+          labels:
+            severity: critical
+            alertType: infra-service
+          annotations:
+            description: "CPU load is > 95%\n {{ $labels.hostname }} : {{ $labels.instance }}"
+            summary: "Host high CPU load (instance {{ $labels.instance }})"
+        - alert: HostHighMemoryUsage
+          expr: 100 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100) >= 95
+          for: 10m
+          labels:
+            severity: critical
+            alertType: infra-service
+          annotations:
+            description: "Node memory is > 90%\n {{ $labels.hostname }} : {{ $labels.instance }}"
+            summary: "Host out of memory (instance {{ $labels.instance }})"
+        - alert: HostHighDiskUsage 
+          expr: 100 - (node_filesystem_avail_bytes{mountpoint !~ "/mnt.*|/run.*|/boot.*|/snap.*|/var/lib/lxcfs"}  * 100) / node_filesystem_size_bytes{mountpoint !~ "/mnt.*|/run.*|/boot.*|/snap.*|/var/lib/lxcfs"} >= 90
+          for: 10m
+          labels:
+            severity: critical
+            alertType: infra-service
+          annotations:
+            description: "Disk is > 90%\n {{ $labels.hostname }} : {{ $labels.instance }}\n Mountpoint: {{ $labels.mountpoint}}"
+            summary: "Host out of disk space (instance {{ $labels.instance }})"
+        - alert: HostDown 
+          expr: up{hostname!~"gke.*"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            alertType: infra-service
+          annotations:
+            description: "{{ $labels.hostname }} : {{ $labels.instance }} is down"
+            summary: "Host down (instance {{ $labels.instance }})"
+    ```
+    - ตัวอย่างการกำหนดค่าการแจ้งเตือน Alert Rule ในส่วนของ Node Exporter
+
+    โดยเมื่อระบบมีสภาพแวดล้อมที่ตรงเงื่อนไขการแจ้งเตือนก็จะทำการส่ง alert ไปให้ Alertmanager เพื่อทำการส่ง notification เข้าไปยัง application ที่กำหนด
+
+    ![alertmanager-slack-pic-3](./media/alertmanager-slack-pic-3.png)
+    - รูปตัวอย่างแสดงการแจ้งเตือนสถานะ RESOLVED ของ API ในระบบ
 
 - ระบบ visualization
 
   - grafana
 
       ![system-monitoring-grafana-architecture](./media/system-monitoring-grafana-architecture.png)
+
+  จะมีการเขียน PromQL เพื่อดึงเอาข้อมูล Metrics ออกมาแสดงผลแบบกราฟ
+
+  ![grafana-haproxy-setting-dashboard](./media/grafana-haproxy-setting-dashboard.png)
+  - รูปตัวอย่าง dashboard ของ grafana ใน 1 panel
 
 ## 4 ผลการวิจัย
 
