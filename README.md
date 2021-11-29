@@ -727,7 +727,7 @@ Log-based software monitoring: a systematic mapping study
 
 ### 3.3 การออกแบบ (diagram ต่าง ๆ เช่น Use Case, Class, ER พร้อมคำอธิบายอย่างละเอียด)
 
-- รูป deployment diagram
+- 3.3.1 รูป deployment diagram
 
     ![system-deployment-diagram](./media/system-deployment-diagram.png)
 
@@ -737,7 +737,7 @@ Log-based software monitoring: a systematic mapping study
 
     ในส่วนของเครื่อง Prometheus จะทำหน้าที่ในการรวมและจัดเก็บ metrics ของระบบทั้งหมด
 
-- รูป network port schematics ของส่วน Kubernetes
+- 3.3.2 รูป network port schematics ของส่วน Kubernetes
 
     ![system-kubernetes-network-port-schematics](./media/system-kubernetes-network-port-schematics.png)
 
@@ -749,7 +749,7 @@ Log-based software monitoring: a systematic mapping study
 
     ภายใน woker node จะมี ingress-controller ที่ถูกติดตั้งใช้งานแบบ daemon-set ทำหน้าที่ในการจับคู่ domain ที่วิ่งเข้ามาไปยัง service ภายในที่เหมาะสม
 
-- รูป network port schematics ของส่วน Graylog cluster
+- 3.3.3 รูป network port schematics ของส่วน Graylog cluster
 
     ![system-graylog-network-port-schematics](./media/system-graylog-network-port-schematics.png)
 
@@ -761,7 +761,7 @@ Log-based software monitoring: a systematic mapping study
 
     การประกอบ cluster ของแต่ละเครื่องมือเช่น Graylog, MongoDB และ Elasticsearch ทำให้ระบบมีความสามารถในการทำ High Availability (HA) ที่สูง
   
-- รูป network port schematics ของส่วน Prometheus server
+- 3.3.4 รูป network port schematics ของส่วน Prometheus server
 
     ![system-prometheus-network-port-schematics](./media/system-prometheus-network-port-schematics.png)
 
@@ -775,9 +775,9 @@ Log-based software monitoring: a systematic mapping study
 
     ![system-architecture](./media/system-architecture.png)
 
-- ระบบ monitoring
+- 3.4.1 ระบบ monitoring
 
-  - ระบบ metrics
+  - 3.4.1.1 ระบบ metrics
 
     ![system-monitoring-metrics-architecture](./media/system-monitoring-metrics-architecture.png)
 
@@ -965,7 +965,7 @@ Log-based software monitoring: a systematic mapping study
       ```
       - ตัวอย่าง prometheus configuration
 
-  - ระบบ logging
+  - 3.4.1.2 ระบบ logging
 
     ![system-monitoring-logs-architecture](./media/system-monitoring-logs-architecture.png)
 
@@ -1063,7 +1063,8 @@ Log-based software monitoring: a systematic mapping study
             ```
       ![graylog-web-page](./media/graylog-web-page.png)
       - รูปหน้าต่าง UI ของ graylog
-  - ระบบ Tracing
+  
+  - 3.4.1.3 ระบบ Tracing
 
     ![system-monitoring-traces-architecture](./media/system-monitoring-traces-architecture.png)
 
@@ -1106,7 +1107,7 @@ Log-based software monitoring: a systematic mapping study
       
       ![jaeger-web-page](./media/traces.jpg)  
 
-- ระบบ alerting
+- 3.4.2 ระบบ alerting
 
     ![system-monitoring-alerting-architecture](./media/system-monitoring-alerting-architecture.png)
 
@@ -1169,7 +1170,7 @@ Log-based software monitoring: a systematic mapping study
     ![alertmanager-slack-pic-3](./media/alertmanager-slack-pic-3.png)
     - รูปตัวอย่างแสดงการแจ้งเตือนสถานะ RESOLVED ของ API ในระบบ
 
-- ระบบ visualization
+- 3.4.3 ระบบ visualization
 
   - grafana
 
