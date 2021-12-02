@@ -1183,6 +1183,75 @@ Log-based software monitoring: a systematic mapping study
 
 ## 4 ผลการวิจัย
 
+ผลของการทำงานระบบนั้นสามารถตรวจจับปัญหาที่กำลังเกิดขึ้นและจะเกิดขึ้นได้จากระบบ monitoring ที่ได้ทำการออกแบบทั้ง service ภายใน Kubernetes และ service เดิมของระบบที่มีอยู่
+
+### 4.1 สามารถตรวจกับการทำงานของ Application ภายใน Kubernetes cluster ได้และปรับให้เหมาะสม
+
+- 4.1.1 ปรับการทำงานของ Application จากการทำ Monitoring Tracs
+
+    - 4.1.1.1 ก่อนปรับการทำงานของ Application
+
+        ![traces](./media/traces.jpg)
+        - ภาพการทำ tracing ของ service ใน Kubernetes
+
+        ภาพแสดงการเรียกใช้งาน API ของตัวหลักจะเห็นได้ว่าใน 1 ในการทำงานที่เข้ามาในระบบจะมีการเรียกใช้งาน service อื่น ๆ ภายใน Kubernetes อีกเป็นจำนวนหลายครั้งและมีรูปแบบการ Query ดึงข้อมูลแบบเดิม
+
+        ระบบมีเวลา response time เฉลี่ยที่ 0.02 6.82 17.48 21.04 27.25 45.12 วินาที ที่เปอร์เซ็นต์ไทล์ที่ 0 50 90 95 99 และ 100 ตามลำดับโดยมีเวลาเฉลี่ยที่ 8.33 วินาที
+
+        ![loadtest-1000c-before-optimization](./media/loadtest-1000c-before-optimization.png)
+
+        จากผลการทำงานของตารางที่ใช้ Invoker 5 ตัว Loan 4 และ service อื่น ๆ อีก 2 ในแถวสุดท้ายของ[*** ชื่อตาราง ***] จะเห็นได้ว่ามี success อยู่ที่ 45,xxx ถึง 49,xxx ครั้ง และ success rate อยู่ที่ประมาณ 83% - 88% ที่ใช้ 1000 concurrency 
+
+    - 4.1.1.2 หลังจากปรับการทำงานของ Application
+
+        ![traces-version2](./media/traces-version2.png)
+
+        เปลี่ยนเป็นการเรียกใช้งาน API ครั้งเดียวจาก service อื่น ๆ
+
+        ![loadtest-1000c-after-optimization](./media/loadtest-1000c-after-optimization.png)
+
+        จากผลการทำงานของตารางที่ใช้ Invoker 5 ตัว Loan 4 และ service อื่น ๆ อีก 2 ในแถวสุดท้ายของ[*** ชื่อตาราง ***] จะเห็นได้ว่ามี success อยู่ที่ 60,xxx ถึง 77,xxx ครั้ง และ success rate อยู่ที่ประมาณ 90% - 98% ที่ใช้ 1000 concurrency
+
+        ระบบมีเวลา response time ที่ 0.03 4.77 14.21 17.71 25.28 55.68 วินาที ที่เปอร์เซ็นต์ไทล์ที่ 0 50 90 95 99 และ 100 ตามลำดับโดยมีเวลาเฉลี่ยที่ 6.34 วินาที
+
+- 4.1.2 ตรวจพบคอขวดภายในระบบจากการทำ Monitoring Metrics
+
+    - 4.1.2.1 พบคอขวดการทำงานของระบบ
+
+        ![node-bandwidth-usage-2000c](./media/node-bandwidth-usage-2000c.png)
+        - ภาพกาใช้งาน network bandwidth ที่ 2000 concurrency
+
+        จากภาพ[*** ชื่อภาพด้านบน ***]จะเห็นได้ว่าระบบมีการใช้งาน bandwidth ที่คงที่ตามจำนวน concurrency ที่ 2000
+
+        ![node-bandwidth-usage-3000c](./media/node-bandwidth-usage-3000c.png)
+        - ภาพกาใช้งาน network bandwidth ที่ 3000 concurrency
+
+        เป็นการทดลองทำ capacity test ด้วย concurrency ที่ 3000 จากภาพ[*** ชื่อภาพด้านบน ***]จะเห็นได้ว่าเมื่อระบบทำงานไปได้สักระยะหนึ่ง bandwidth ของระบบจะน้อยลงหรือเทียบเท่าเมื่อมีการใช้งานที่ 2000 concurrency ถึงแม้ว่าจะมีผู้ใช้งานในระบบที่มากขึ้นกว่า 2000 concurrency ก็ตามแสดงให้เห็นถึงความสามารถในการรองรับของระบบ ณ เวลานั้น
+
+## 4.2 ภาพรวมระบบ Monitoring Metrics
+
+สามารถสร้างระบบจัดเก็บ Metrics อื่น ๆ ภายในระบบของ Kubernetes และ service เดิมนอก Kubernetes ไว้ในที่เดียวกันได้เพื่อใช้สำหรับการนำไปวิเคราะห์และประมวลผลได้
+
+![prometheus-centralized-metrics.png](./media/prometheus-centralized-metrics.png)
+- รูปภาพการรวม Metrics ไว้ศูนย์กลางเพื่อใช้ในการวิเคราห์และประมวลผล
+
+## 4.3 ภาพรวมระบบ Monitoring Logs
+
+![graylog-centralized-logs.png](./media/graylog-centralized-logs.png)
+
+## 4.4 ภาพรวมระบบ Monitoring Traces
+
+![prometheus-centralized-metrics.png](./media/prometheus-centralized-metrics.png.png)
+
+## 4.5 ภาพรวมระบบ visualization
+
+![grafana-centralized-dashboard.png](./media/grafana-centralized-dashboard.png)
+
+## 4.6 ภาพรวมระบบ alerting
+
+![alertmanager-slack-pic-1.png](./media/alertmanager-slack-pic-1.png)
+![alertmanager-slack-pic-2.png](./media/alertmanager-slack-pic-2.png)
+
 (รายละเอียดของผลการทำงานของระบบ ดีขึ้นจากแต่เดิมอย่างไร ด้วยตัวเลขเท่าไหร่ นำข้อมูลมาเปรียบเทียบกัน สำเร็จกี่เปอร์เซ็นต์ ล้มเหลวกี่เปอร์เซ็นต์)
 
 ## 5 สรุปผลการวิจัยและข้อเสนอแนะ
